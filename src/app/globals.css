@@ -1,1 +1,79 @@
 @import "tailwindcss";
+
+:root {
+  --white: #fdfcfc;
+  --black: #030202;
+
+  /************************ Neutral color ************************/
+  --neutral-700: #5a5858;
+  --neutral-600: #747171;
+  --neutral-400: #a7a5a5;
+  --neutral-150: #e6e5e5;
+  --neutral-300: #c0bfbf;
+  --neutral-100: #f2f2f2;
+  --neutral-200: #d9d8d8;
+
+  /************************ Primary color ************************/
+  --primary-900: #380c0a;
+  --primary-700: #8f1e19;
+  --primary-800: #641512;
+  --primary-100: #fae2e1;
+  --primary-500: #db3a34;
+}
+
+@theme inline {
+  /************************ Surface ************************/
+  --color-bg-default: var(--white);
+  --color-bg-inverted: var(--black);
+  --color-bg-subtle: var(--neutral-150);
+  --color-bg-minimal: var(--neutral-100);
+
+  /************************ Text ************************/
+  --color-text-default: var(--black);
+  --color-text-inverted: var(--white);
+  --color-text-secondary: var(--neutral-700);
+  --color-text-disable: var(--neutral-400);
+  --color-text-primary: var(--primary-700);
+  --color-text-active: var(--primary-500);
+  --color-text-mute: var(--neutral-600);
+
+  /************************ Font ************************/
+  --font-sans: var(--font-geist-sans);
+
+  /************************ Ring ************************/
+  --color-ring-default: var(--primary-900);
+
+  /************************ Button ************************/
+  --color-button-bg-default: var(--primary-700);
+  --color-button-bg-default: var(--primary-700);
+  --color-button-bg-hover: var(--primary-800);
+  --color-button-bg-disable: var(--neutral-600);
+  --color-button-bg-secondary-hover: var(--primary-100);
+
+  /************************ Border ************************/
+  --color-border-disable: var(--neutral-600);
+  --color-border-mute: var(--neutral-300);
+  --color-border-default: var(--primary-700);
+  --color-border-danger: var(--primary-500);
+
+  /************************ Icon ************************/
+  --color-icon-default: var(--black);
+
+  /************************ Input ************************/
+  --color-input-bg-default: var(--neutral-150);
+  --color-input-bg-disable: var(--neutral-100);
+
+  /************************ Shadow ************************/
+  --shadow-small: 0 4px 16px rgb(0 0 0 / 0.12);
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
