@@ -7,6 +7,7 @@ import type { SearchParams } from "nuqs/server";
 import FilterButton from "./FilterButton";
 import PropertyTypeFilters from "./PropertyTypeFilters";
 import Sort from "./Sort";
+import Pagination from "./Pagination";
 
 interface ListingContentProps {
   params: Promise<{ location: string }>;
@@ -80,6 +81,7 @@ const ListingContent: React.FC<ListingContentProps> = async ({
           ),
         )}
       </div>
+      <Pagination pageSize={data.meta.limit} totalCount={data.meta.total} />
     </Fragment>
   );
 };
