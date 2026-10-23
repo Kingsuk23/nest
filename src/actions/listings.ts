@@ -1,7 +1,6 @@
 import db from "@/db";
 import { propertiesTable } from "@/db/schema";
-import { filtersType, type Area } from "@/utils/filterParsers";
-import { StatusType } from "@/utils/type";
+import { filtersType } from "@/utils/filterParsers";
 import { sql } from "drizzle-orm";
 
 type Category = "interior" | "exterior" | "view";
@@ -9,6 +8,8 @@ type Table = typeof propertiesTable;
 
 const PAGE_SIZE = 18;
 const SQFT_PER_ACRE = 43_560;
+
+export const year = new Date().getFullYear();
 
 const sortMap = {
   newest: { listedAt: "desc", id: "asc" },
@@ -26,7 +27,6 @@ const featureFilters = (
   return values.map((value) => ({ feature: { category, value } }));
 };
 
-// nuqs returns null for unset filters, so treat null (and 0) as "no filter"
 const range = (min?: number | null, max?: number | null) =>
   min == null && max == null
     ? undefined
@@ -34,9 +34,6 @@ const range = (min?: number | null, max?: number | null) =>
         ...(min != null && { gte: min }),
         ...(max != null && { lte: max }),
       };
-
-const toSqft = ({ value, unit }: Area) =>
-  unit === "acre" ? value * SQFT_PER_ACRE : value;
 
 const areaSqft = (t: Table) => sql`(
   case when ${t.area}->>'unit' = 'acre'
@@ -49,19 +46,37 @@ export const getListings = async (location: string, filters: filtersType) => {
   const term = location.trim();
 
   const areaConditions = [
-    filters.min_sqft && {
-      RAW: (t: Table) => sql`${areaSqft(t)} >= ${toSqft(filters.min_sqft!)}`,
+    filters.min_sqft > 0 && {
+      RAW: (t: Table) => sql`${areaSqft(t)} >= ${filters.min_sqft}`,
     },
-    filters.max_sqft && {
-      RAW: (t: Table) => sql`${areaSqft(t)} <= ${toSqft(filters.max_sqft!)}`,
+    filters.max_sqft > 0 && {
+      RAW: (t: Table) => sql`${areaSqft(t)} <= ${filters.max_sqft}`,
+    },
+
+    filters.min_lot > 0 && {
+      RAW: (t: Table) => sql`${areaSqft(t)} >= ${filters.min_lot}`,
+    },
+    filters.max_lot > 0 && {
+      RAW: (t: Table) => sql`${areaSqft(t)} <= ${filters.max_lot}`,
     },
   ].filter(Boolean) as { RAW: (t: Table) => ReturnType<typeof sql> }[];
+
+  const timeConditions =
+    filters.day_on_platform > 0
+      ? [
+          {
+            RAW: (t: Table) =>
+              sql`${t.listedAt} >= now() - ${filters.day_on_platform}::int * interval '1 day'`,
+          },
+        ]
+      : [];
 
   const andConditions = [
     ...featureFilters("interior", filters.interiors),
     ...featureFilters("exterior", filters.exteriors),
     ...featureFilters("view", filters.views),
     ...areaConditions,
+    ...timeConditions,
   ];
 
   const where = {
@@ -69,19 +84,25 @@ export const getListings = async (location: string, filters: filtersType) => {
     listingStatus: filters.listing_status ? filters.listing_status : undefined,
 
     price: range(filters.min_price, filters.max_price),
+    buildYear: range(
+      filters.max_age > 0 ? year - filters.max_age : null,
+      filters.min_age > 0 ? year - filters.min_age : null,
+    ),
     bedrooms: filters.beds ? { gte: filters.beds } : undefined,
     bathrooms: filters.baths ? { gte: filters.baths } : undefined,
     garage: filters.garage ? { gte: filters.garage } : undefined,
     stories: filters.stories ? { gte: filters.stories } : undefined,
     hoaFee: filters.hoa_fee ? { lte: filters.hoa_fee } : undefined,
 
-    listedAt: filters.day_on_platform
-      ? { gte: new Date(Date.now() - filters.day_on_platform * 86_400_000) }
-      : undefined,
-
     tourTypes: filters.tour_type.length
       ? { arrayOverlaps: filters.tour_type }
       : undefined,
+
+    constructionType: filters.construction_type.length
+      ? { in: filters.construction_type }
+      : undefined,
+
+    priceDropped: filters.is_price_drop,
 
     AND: andConditions.length ? andConditions : undefined,
 

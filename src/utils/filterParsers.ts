@@ -8,14 +8,11 @@ import {
   parseAsStringEnum,
 } from "nuqs/server";
 
-import { SoldStatusType, StatusType } from "./type";
+import { propertyTypes, statusType, tourTypes, constructionType } from "./type";
 import { createLoader } from "nuqs/server";
-import { propertyTypeEnum, tourTypeEnum } from "@/db/schema";
 
 export const sortOptions = ["newest", "price_asc", "price_desc"] as const;
 export type Area = { value: number; unit: "sqft" | "acre" };
-
-const currentYear = new Date().getFullYear();
 
 export const parseAsArea = createParser<Area>({
   parse: (query) => {
@@ -30,57 +27,56 @@ export const parseAsArea = createParser<Area>({
   eq: (a, b) => a.value === b.value && a.unit === b.unit,
 });
 
-export const defaultPropertyFilters = {
-  property_type: "",
+export const defaultPropertyFilters: filtersType = {
+  property_type: null,
   sort: "newest",
   page: 1,
   beds: 0,
   baths: 0,
-  sold_status: SoldStatusType.SALE,
-  status: StatusType.ANY,
-  house_type: [] as string[],
-  tour_type: [] as string[],
-  day_on_platform: "",
-  min_sqft: "",
-  max_sqft: "",
-  min_lot: "",
-  max_lot: "",
-  min_age: "",
-  max_age: "",
-  hoa_fee: "",
+  listing_status: statusType.ANY,
+  construction_type: [],
+  tour_type: [],
+  day_on_platform: 0,
+  min_sqft: 0,
+  max_sqft: 0,
+  min_lot: 0,
+  max_lot: 0,
+  min_age: 0,
+  max_age: 0,
+  hoa_fee: 0,
   garage: 0,
   stories: 0,
-  interiors: [] as string[],
-  exteriors: [] as string[],
-  views: [] as string[],
-  keywords: [] as string[],
+  interiors: [],
+  exteriors: [],
+  views: [],
   min_price: 0,
   max_price: 10000000,
   is_price_drop: false,
 };
 
 export const filterParsers = {
-  property_type: parseAsStringEnum(propertyTypeEnum.enumValues),
-  location: parseAsString.withDefault(""),
+  property_type: parseAsStringEnum([...propertyTypes]),
   sort: parseAsStringEnum([...sortOptions]).withDefault("newest"),
   page: parseAsInteger.withDefault(1),
   beds: parseAsInteger.withDefault(0),
   baths: parseAsInteger.withDefault(0),
-  listing_status: parseAsStringEnum<StatusType>(
-    Object.values(StatusType),
-  ).withDefault(StatusType.ANY),
-  construction_type: parseAsArrayOf(parseAsString).withDefault([]),
-  tour_type: parseAsArrayOf(
-    parseAsStringEnum(tourTypeEnum.enumValues),
+  listing_status: parseAsStringEnum<statusType>(
+    Object.values(statusType),
+  ).withDefault(statusType.ANY),
+  construction_type: parseAsArrayOf(
+    parseAsStringEnum([...constructionType]),
   ).withDefault([]),
+  tour_type: parseAsArrayOf(parseAsStringEnum([...tourTypes])).withDefault([]),
   day_on_platform: parseAsInteger.withDefault(0),
-  min_sqft: parseAsArea,
-  max_sqft: parseAsArea,
-  min_lot: parseAsArea,
-  max_lot: parseAsArea,
-  min_age: parseAsInteger.withDefault(1860),
-  max_age: parseAsInteger.withDefault(currentYear),
+
+  min_sqft: parseAsInteger.withDefault(0),
+  max_sqft: parseAsInteger.withDefault(0),
+  min_lot: parseAsInteger.withDefault(0),
+  max_lot: parseAsInteger.withDefault(0),
+  min_age: parseAsInteger.withDefault(0),
+  max_age: parseAsInteger.withDefault(0),
   hoa_fee: parseAsInteger.withDefault(0),
+
   garage: parseAsInteger.withDefault(0),
   stories: parseAsInteger.withDefault(0),
   interiors: parseAsArrayOf(parseAsString).withDefault([]),
@@ -89,9 +85,10 @@ export const filterParsers = {
   min_price: parseAsInteger.withDefault(0),
   max_price: parseAsInteger.withDefault(10000000),
   is_price_drop: parseAsBoolean.withDefault(false),
-  limit: parseAsInteger.withDefault(18),
 };
 
 export const loadFilters = createLoader(filterParsers);
 
 export type filtersType = inferParserType<typeof filterParsers>;
+
+export type tourType = filtersType["tour_type"][number];

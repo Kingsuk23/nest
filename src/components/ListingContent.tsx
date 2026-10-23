@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import LocationSearch from "./LocationSearch";
 import { loadFilters } from "@/utils/filterParsers";
 import type { SearchParams } from "nuqs/server";
+import FilterButton from "./FilterButton";
 
 interface ListingContentProps {
   params: Promise<{ location: string }>;
@@ -28,7 +29,7 @@ const ListingContent: React.FC<ListingContentProps> = async ({
         </h1>
         <div className="flex items-center gap-3  max-md:w-full">
           <LocationSearch />
-          {/* <FilterButton /> */}
+          <FilterButton />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-8">

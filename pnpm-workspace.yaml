@@ -15,3 +15,4 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.4.2'
   - eslint-config-next@16.4.2
   - next@16.4.2
+  - dotenv@18.0.9

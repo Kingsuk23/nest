@@ -9,10 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-slider": "^1.6.1",
+    "@radix-ui/react-slot": "^1.5.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dotenv": "^18.0.8",
+    "dotenv": "^18.0.9",
     "drizzle-orm": "1.0.0-rc.4",
-    "lucide-react": "^1.57.0",
+    "lucide-react": "^1.61.0",
     "next": "16.4.2",
     "nuqs": "^2.10.2",
     "pg": "^8.23.1",
@@ -36,5 +39,5 @@
     "tsx": "^4.23.15",
     "typescript": "^7"
   },
-  "packageManager": "pnpm@12.11.2"
+  "packageManager": "pnpm@12.15.0"
 }

@@ -1,3 +1,4 @@
+import FilterButtonSkeleton from "./FilterButtonSkeleton";
 import LocationSearchSkeleton from "./LoctionSearchSkeleton";
 import PropertyCardSkeleton from "./PropertyCardSkeleton";
 
@@ -11,6 +12,7 @@ const ListingContentSkeleton = () => {
         <div className="hidden h-8 w-72 rounded-full bg-gray-200 md:block" />
         <div className="flex items-center gap-3  max-md:w-full">
           <LocationSearchSkeleton />
+          <FilterButtonSkeleton />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-8">
