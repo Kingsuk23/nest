@@ -5,6 +5,8 @@ import LocationSearch from "./LocationSearch";
 import { loadFilters } from "@/utils/filterParsers";
 import type { SearchParams } from "nuqs/server";
 import FilterButton from "./FilterButton";
+import PropertyTypeFilters from "./PropertyTypeFilters";
+import Sort from "./Sort";
 
 interface ListingContentProps {
   params: Promise<{ location: string }>;
@@ -31,6 +33,18 @@ const ListingContent: React.FC<ListingContentProps> = async ({
           <LocationSearch />
           <FilterButton />
         </div>
+      </div>
+      <div className="md:mt-8 mt-6 flex justify-between items-center gap-10">
+        <PropertyTypeFilters />
+        <Sort className="md:flex hidden" />
+      </div>
+      <h1 className="text-lg font-semibold md:hidden mt-4 ">
+        Homes for Sale in {location}
+      </h1>
+
+      <div className="flex justify-between items-center mt-4 md:hidden">
+        <span className="text-base ">{data.meta.total} Homes</span>
+        <Sort className="flex" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-8">
         {data.data.map(
