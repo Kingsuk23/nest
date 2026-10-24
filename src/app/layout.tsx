@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +22,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         suppressHydrationWarning={true}
         className="min-h-screen overflow-x-hidden bg-bg-default font-sans text-text-default text-sm"
       >
+        <Navbar />
         <NuqsAdapter>{children}</NuqsAdapter>
+        <Footer />
       </body>
     </html>
   );
