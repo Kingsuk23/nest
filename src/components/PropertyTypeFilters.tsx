@@ -1,8 +1,8 @@
 "use client";
 
 import { useFilters } from "@/hooks/useFilters";
+import { useSlider } from "@/hooks/useSlider";
 import { cn } from "@/utils/cn";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 type PropertyType =
   | "single family"
@@ -25,52 +25,12 @@ const propertyTypes: {
 ];
 
 const PropertyTypeFilters = () => {
-  const tabRef = useRef<HTMLDivElement | null>(null);
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const [indicator, setIndicator] = useState({
-    width: 0,
-    left: 0,
-  });
-
   const { filters, setFilter } = useFilters();
 
-  const updateIndicator = useCallback(() => {
-    const activeIndex = propertyTypes.findIndex(
-      (type) => type.value === (filters.property_type ?? null),
-    );
-
-    const activeButton = buttonRefs.current[activeIndex];
-
-    if (!activeButton) return;
-
-    setIndicator({
-      width: activeButton.offsetWidth,
-      left: activeButton.offsetLeft,
-    });
-  }, [filters.property_type]);
-
-  useEffect(() => {
-    updateIndicator();
-
-    const container = tabRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver(updateIndicator);
-
-    resizeObserver.observe(container);
-
-    buttonRefs.current.forEach((button) => {
-      if (button) resizeObserver.observe(button);
-    });
-
-    window.addEventListener("resize", updateIndicator);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateIndicator);
-    };
-  }, [updateIndicator]);
+  const activeIndex = propertyTypes.findIndex(
+    (type) => type.value === (filters.property_type ?? null),
+  );
+  const { tabRef, buttonRefs, indicator } = useSlider(activeIndex);
 
   return (
     <div

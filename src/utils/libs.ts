@@ -14,3 +14,18 @@ export const range = (start: number, end: number) => {
   let length = end - start + 1;
   return Array.from({ length }, (_, idx) => idx + start);
 };
+
+export const getBbox = (
+  center: { lat: number; lng: number },
+  radiusKm: number,
+) => {
+  const latDelta = radiusKm / 111.32;
+  const lngDelta = radiusKm / (111.32 * Math.cos((center.lat * Math.PI) / 180));
+
+  return {
+    minLng: center.lng - lngDelta,
+    minLat: center.lat - latDelta,
+    maxLng: center.lng + lngDelta,
+    maxLat: center.lat + latDelta,
+  };
+};

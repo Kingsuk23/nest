@@ -2,6 +2,7 @@ import db from "@/db";
 import { propertiesTable } from "@/db/schema";
 import { filtersType } from "@/utils/filterParsers";
 import { sql } from "drizzle-orm";
+import z from "zod";
 
 type Category = "interior" | "exterior" | "view";
 type Table = typeof propertiesTable;
@@ -41,6 +42,8 @@ const areaSqft = (t: Table) => sql`(
     else (${t.area}->>'value')::numeric
   end
 )`;
+
+const idSchema = z.uuid();
 
 export const getListings = async (location: string, filters: filtersType) => {
   const term = location.trim();
@@ -156,4 +159,23 @@ export const getListings = async (location: string, filters: filtersType) => {
       totalPages: Math.ceil(total / PAGE_SIZE),
     },
   };
+};
+
+export const getListingById = async (id: string) => {
+  if (!idSchema.safeParse(id).success) return null;
+
+  const property = await db.query.propertiesTable.findFirst({
+    where: { id },
+    with: {
+      detail: true,
+      feature: true,
+      event: true,
+      history: true,
+      media: {
+        orderBy: { isCover: "desc", position: "asc" },
+      },
+    },
+  });
+
+  return property ?? null;
 };

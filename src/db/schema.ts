@@ -60,6 +60,19 @@ export const featureCategoryEnum = pgEnum("featureCategory", [
   "keyword",
 ]);
 
+export const eventTypeEnum = pgEnum("event_type", [
+  "open_house",
+  "virtual_tour",
+  "in_person",
+]);
+
+export const historyKindEnum = pgEnum("history_kind", [
+  "listed",
+  "price_change",
+  "status_change",
+  "sold",
+]);
+
 /* -------------------------------------------------------------------------- */
 /*                              Reusable columns                              */
 /* -------------------------------------------------------------------------- */
@@ -171,15 +184,95 @@ export const propertyFeatureTable = pgTable(
   ],
 );
 
+export const propertyDetailTable = pgTable("propertyDetails", {
+  propertyId: uuid("id")
+    .primaryKey()
+    .references(() => propertiesTable.id, { onDelete: "cascade" }),
+
+  carport: boolean("carport"),
+  parkingTotal: integer("parkingTotal"),
+
+  cooling: text("cooling"),
+  heating: text("heating"),
+
+  entryLevel: integer("entryLevel"),
+  roomsTotal: integer("roomsTotal"),
+  basement: boolean("basement"),
+  petsAllowed: boolean("petsAllowed"),
+  petsNotes: text("petsNotes"),
+
+  waterfront: boolean("waterfront"),
+  additionalParcels: boolean("additionalParcels"),
+
+  sewer: text("sewer"),
+  water: text("water"),
+
+  locationDescription: text("locationDescription"),
+  directions: text("directions"),
+
+  apn: text("apn"),
+  style: text("style"),
+  livingAreaSource: text("livingAreaSource"),
+
+  rawData: jsonb("rawData"),
+
+  ...timestampColumns,
+});
+
+export const propertyEventTable = pgTable(
+  "propertyEvent",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    propertyId: uuid()
+      .notNull()
+      .references(() => propertiesTable.id, { onDelete: "cascade" }),
+
+    type: eventTypeEnum("type").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    meetingUrl: text("meeting_url"),
+    notes: text("notes"),
+
+    ...timestampColumns,
+  },
+  (t) => [index("event_property_starts_idx").on(t.propertyId, t.startsAt)],
+);
+
+export const propertyHistoryTable = pgTable("propertyHistory", {
+  id: uuid().primaryKey().defaultRandom(),
+  propertyId: uuid()
+    .notNull()
+    .references(() => propertiesTable.id, { onDelete: "cascade" }),
+
+  kind: historyKindEnum().notNull(),
+  price: integer().notNull(),
+  per_sqft: integer().notNull(),
+
+  ...timestampColumns,
+});
+
 /* -------------------------------------------------------------------------- */
 /*                                Relation                                    */
 /* -------------------------------------------------------------------------- */
 
 export const relations = defineRelations(
-  { propertiesTable, propertiesMediaTable, propertyFeatureTable },
+  {
+    propertiesTable,
+    propertiesMediaTable,
+    propertyFeatureTable,
+    propertyDetailTable,
+    propertyEventTable,
+    propertyHistoryTable,
+  },
   (r) => ({
     propertiesTable: {
       media: r.many.propertiesMediaTable(),
+      event: r.many.propertyEventTable(),
+      history: r.many.propertyHistoryTable(),
+      detail: r.one.propertyDetailTable({
+        from: r.propertiesTable.id,
+        to: r.propertyDetailTable.propertyId,
+      }),
       feature: r.many.propertyFeatureTable(),
     },
 
@@ -193,6 +286,27 @@ export const relations = defineRelations(
     propertyFeatureTable: {
       property: r.one.propertiesTable({
         from: r.propertyFeatureTable.propertyId,
+        to: r.propertiesTable.id,
+      }),
+    },
+
+    propertyEventTable: {
+      property: r.one.propertiesTable({
+        from: r.propertyEventTable.propertyId,
+        to: r.propertiesTable.id,
+      }),
+    },
+
+    propertyHistoryTable: {
+      property: r.one.propertiesTable({
+        from: r.propertyHistoryTable.propertyId,
+        to: r.propertiesTable.id,
+      }),
+    },
+
+    propertyDetailTable: {
+      property: r.one.propertiesTable({
+        from: r.propertyDetailTable.propertyId,
         to: r.propertiesTable.id,
       }),
     },
